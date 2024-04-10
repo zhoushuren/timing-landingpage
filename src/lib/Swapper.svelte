@@ -117,7 +117,7 @@
 
   // footer
   const footer = [
-    { name: "Github", link: "/" },
+    { name: "Github", link: "https://github.com/zhoushuren/timing-landingpage" },
     { name: "Whitepaper", link: "/" },
   ];
 
@@ -243,14 +243,12 @@
       >{  WBTCAllowance ==  0 ? "Approve": "Swap" }</button
     >
   </div>
-</div>
-
-<!-- <footer class="flex justify-center p-6">
+  <footer class="flex justify-center p-6">
     {#each footer as { name, link }}
       <a
         class="hover:bg-stone-900/30 text-stone-400 hover:text-stone-100 transition-all px-4 py-2 rounded-full"
         href={link}>{name}</a
       >
     {/each}
-  </footer> -->
-<!-- </div> -->
+  </footer>
+</div>
