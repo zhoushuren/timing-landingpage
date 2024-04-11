@@ -6,6 +6,7 @@
   import Amount from "./Amount.svelte";
   import IconSwitch from "./HeroiconsSolidArrowsRightLeft.svelte";
   import IconSwitchVertical from "./HeroiconsSolidArrowsUpDown.svelte";
+  import Wallet from "./Wallet.svelte";
   import Web3Modal from 'web3modal';
   import { ethers } from 'ethers';
 
@@ -118,7 +119,7 @@
   // footer
   const footer = [
     { name: "Github", link: "https://github.com/zhoushuren/timing-landingpage" },
-    { name: "Whitepaper", link: "/" },
+    // { name: "Whitepaper", link: "/" },
   ];
 
   // dashboard
@@ -209,17 +210,17 @@
         </div>
       {/each}
     </div>
-    <h2 class="font-bold text-lg">Swap</h2>
-    <!-- <div class="flex gap-4 relative justify-stretch">
-        <Token tokenName={isBuy ? tokenA : tokenB}></Token>
-        <Token method="To" tokenName={isBuy ? tokenB : tokenA}></Token>
-        <button
-          on:click={() => (isBuy = !isBuy)}
-          class="absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%] rounded-full flex items-center justify-center w-10 h-10 bg-lime-500 text-lime-50 border border-lime-400 hover:bg-lime-400 font-semibold shadow-lg transition-all duration-300 ease-in-out hover:shadow-lime-500/30"
-        >
-          <IconSwitch />
-        </button>
-      </div> -->
+    <div class="flex items-baseline justify-between">
+      <h2 class="font-bold text-lg">Swap</h2>
+      <!-- locked & unlocked -->
+      <span class="flex gap-1 text-xs font-semibold">
+        <span class="text-stone-500">${tokenB} Locked: </span>
+        <span class="pr-2">123</span>
+        <span class="text-stone-500">Unlocked: </span>
+        <span class="pr-2">123</span>
+      </span>
+    </div>
+    <!-- swap -->
     <div class="flex flex-col items-stretch gap-2">
       <Amount
         on:setMax={() => (payAmount = isBuy ? myTokenABalance : myTokenBBalance)}
@@ -238,6 +239,9 @@
       </div>
       <Amount readonly title={"You Get $" + (isBuy ? tokenB : tokenA)} bind:value={getAmount}></Amount>
     </div>
+    {#if connectedWallet}
+      <Wallet walletName="Metamask" walletAddress="wallet address"></Wallet>
+    {/if}
     <button on:click={ WBTCAllowance ==  0 ? approve : swap}
       class="rounded-xl px-4 py-3 bg-lime-500 text-lime-50 border border-lime-400 hover:bg-lime-400 font-semibold transition-all duration-300 ease-in-out hover:shadow-lime-500/30 shadow-xl"
       >{  WBTCAllowance ==  0 ? "Approve": "Swap" }</button
