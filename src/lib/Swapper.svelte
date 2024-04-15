@@ -147,7 +147,6 @@
 
   // footer
   const footer = [
-    { name: "Github", link: "https://github.com/zhoushuren/timing-landingpage" },
     // { name: "Whitepaper", link: "/" },
   ];
 
