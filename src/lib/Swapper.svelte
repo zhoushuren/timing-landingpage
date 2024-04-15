@@ -132,7 +132,7 @@
 
   // swap amount
   let payAmount; // bind user input
-  $: getAmount = !isBuy ? payAmount * ABRate : payAmount / ABRate;
+  $: getAmount = !isBuy ? payAmount / ABRate : payAmount * ABRate;
 
   // exchange rate
   export let ABRate = 0;
