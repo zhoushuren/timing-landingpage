@@ -43,8 +43,10 @@
     enableAnalytics: true, // Optional - defaults to your Cloud configuration
     enableOnramp: true, // Optional - false as default
   })
-  const contract = '0xd413D215980e26c342Ae538b446a6afFc3CAC692'
-  const contractWBTC = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f'
+  // const contract = '0xd413D215980e26c342Ae538b446a6afFc3CAC692'
+  const contract = '0x7da0F31081a46F84E6c9e4E226a397Be268C8Ccf' // test
+  // const contractWBTC = '0x2f2a2543b76a4166549f7aab2e75bef0aefc5b0f'
+  const contractWBTC = '0x7447763789dbaf8b9bacf1c2545131cebbd6b023' //test
   let  account = ''
   let WBTCAllowance = 0
   let lockedXYZAmount = 0
@@ -59,7 +61,8 @@
         address: contract,
         functionName: 'getPrice',
       })
-      ABRate = new Number(getPrice) / 1e18
+      console.log("getPrice:", getPrice)
+      ABRate = new Number(getPrice)
 
       const balanceWBTCPool = await readContract(config,{
         abi: XYZAbi,
@@ -76,14 +79,14 @@
       })
       console.log(availableWBTCAccount) // 用户一共多少BTC
       myTokenABalance = new Number(availableWBTCAccount ) / 1e8
-
-      // const availableXYZAccount = await readContract(config,{
-      //   abi: XYZAbi,
-      //   address: contract,
-      //   functionName: 'balanceOf',
-      //   args: [account.address]
-      // })
-      // myTokenBBalance = new Number(availableXYZAccount ) / 1e18
+      console.log(myTokenABalance)
+      const availableXYZAccount = await readContract(config,{
+        abi: XYZAbi,
+        address: contract,
+        functionName: 'balanceOf',
+        args: [account.address]
+      })
+      myTokenBBalance = new Number(availableXYZAccount ) / 1e18
 
       const _WBTCAllowance = await readContract(config,{
         abi: XYZAbi,
@@ -94,33 +97,29 @@
       console.log("WBTCAllowance:", _WBTCAllowance)
       WBTCAllowance = new Number(_WBTCAllowance)
 
-      let lockTimeIndex = await readContract(config,{
-        abi: XYZAbi,
-        address: contract,
-        functionName: 'lockTimeIndex',
-        args: [account.address]
-      })
-      lockTimeIndex = new Number(lockTimeIndex)
-      // console.log("lockTimeIndex:",lockTimeIndex)
-      for(let i= 0; i< lockTimeIndex; i++) {
-        const lockTime = await readContract(config,{
-          abi: XYZAbi,
-          address: contract,
-          functionName: 'lockTime',
-          args: [account.address, i]
-        })
-        // console.log("lockTime:",lockTime)
-        if(parseInt(lockTime[1]) > Date.now() / 1000) {
-          lockedXYZAmount += parseInt(lockTime[0] ) / 1e18
-        }else{
-          unlockedXYZAmount += parseInt(lockTime[0]) / 1e18
-          myTokenBBalance = unlockedXYZAmount
-        }
-      }
-
-
-
-
+      // let lockTimeIndex = await readContract(config,{
+      //   abi: XYZAbi,
+      //   address: contract,
+      //   functionName: 'lockTimeIndex',
+      //   args: [account.address]
+      // })
+      // lockTimeIndex = new Number(lockTimeIndex)
+      //
+      // for(let i= 0; i< lockTimeIndex; i++) {
+      //   const lockTime = await readContract(config,{
+      //     abi: XYZAbi,
+      //     address: contract,
+      //     functionName: 'lockTime',
+      //     args: [account.address, i]
+      //   })
+      //   // console.log("lockTime:",lockTime)
+      //   if(parseInt(lockTime[1]) > Date.now() / 1000) {
+      //     lockedXYZAmount += parseInt(lockTime[0] ) / 1e18
+      //   }else{
+      //     unlockedXYZAmount += parseInt(lockTime[0]) / 1e18
+      //     myTokenBBalance = unlockedXYZAmount
+      //   }
+      // }
     }, 1)
   });
 
@@ -128,11 +127,11 @@
 
   // STATE
   const tokenA = "BTC";
-  const tokenB = "XYZ";
+  const tokenB = "XYZT";
 
   // swap amount
   let payAmount; // bind user input
-  $: getAmount = !isBuy ? payAmount / ABRate : payAmount * ABRate;
+  $: getAmount = !isBuy ? payAmount / ABRate  / 1e8: payAmount * ABRate * 1e8;
 
   // exchange rate
   export let ABRate = 0;
@@ -141,6 +140,9 @@
   export let platformTokenABalance = 0;
   export let myTokenABalance = 0;
   export let myTokenBBalance = 0;
+
+  export let inputTokenA = 0
+  export let inputTokenB = 0
 
   let amount;
   let isBuy = true;
@@ -152,9 +154,9 @@
 
   // dashboard
   $: dashboard = [
-    { name: `$${tokenA}/$${tokenB}`, value: ABRate.toLocaleString("en-US", { maximumFractionDigits: 9 }) },
+    { name: `${tokenA}/${tokenB}`, value: (ABRate * 1e8).toLocaleString("en-US", { maximumFractionDigits: 9 }) },
     {
-      name: `$${tokenA} in Platform`,
+      name: `${tokenA} in Platform`,
       value: platformTokenABalance.toLocaleString("en-US", { maximumFractionDigits: 2 }),
     },
   ];
@@ -164,7 +166,7 @@
     if(locked) return
     locked = true
     try{
-      console.log(isBuy, myTokenABalance * 1e8 ,myTokenBBalance * 1e18)
+      // console.log(isBuy, myTokenABalance * 1e8 ,myTokenBBalance * 1e18)
       if(isBuy) {
         // console.log("buy")
         const result = await writeContract(config, {
@@ -172,16 +174,19 @@
           address: contract,
           functionName: 'Buy',
           args: [
-            myTokenABalance * 1e8,
+            (payAmount * 1e8).toFixed(0),
           ],
         })
       }else{
+
+        const _payAmount = (payAmount * 1e18).toLocaleString().split(',').join('')
+        console.log("sell", payAmount, _payAmount)
         const result = await writeContract(config, {
           abi: XYZAbi,
           address: contract,
           functionName: 'Sell',
           args: [
-            myTokenABalance * 1e8,
+            _payAmount
           ],
         })
       }
@@ -251,11 +256,11 @@
     <!-- swap -->
     <div class="flex flex-col items-stretch gap-2">
       <Amount
-        on:setMax={() => (payAmount = isBuy ? myTokenBBalance : myTokenABalance)}
-        max={isBuy ? myTokenBBalance : myTokenABalance}
-        title={"You " + (isBuy ? "Pay" : "Sell") + " $" + (isBuy ? tokenA : tokenB)}
+        on:setMax={() => (payAmount = isBuy ? myTokenABalance : myTokenBBalance)}
+        max={isBuy ? myTokenABalance : myTokenBBalance}
+        title={"You " + (isBuy ? "Pay" : "Sell") + " " + (isBuy ? tokenA : tokenB)}
         bind:value={payAmount}
-        caption={"Available: " + (isBuy ? myTokenBBalance : myTokenABalance)}
+        caption={"Available: " + (isBuy ? myTokenABalance  : myTokenBBalance)}
       ></Amount>
       <div class="relative h-0">
         <button
@@ -265,7 +270,7 @@
           <IconSwitchVertical />
         </button>
       </div>
-      <Amount readonly title={"You Get $" + (isBuy ? tokenB : tokenA)} bind:value={getAmount}></Amount>
+      <Amount readonly title={"You Get " + (isBuy ? tokenB : tokenA)} bind:value={getAmount}></Amount>
     </div>
     {#if connectedWallet}
       <Wallet walletName="Metamask" walletAddress="wallet address"></Wallet>
