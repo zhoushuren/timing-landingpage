@@ -56,13 +56,22 @@
       const account = getAccount(config)
       // console.log(account.address)
 
-      const getPrice = await readContract(config,{
-        abi: XYZAbi,
-        address: contract,
-        functionName: 'getPrice',
-      })
-      console.log("getPrice:", getPrice)
-      ABRate = new Number(getPrice)
+      async function getPrice(){
+        const price = await readContract(config,{
+          abi: XYZAbi,
+          address: contract,
+          functionName: 'getPrice',
+        })
+        console.log("getPrice:", price)
+        ABRate = new Number(price)
+      }
+      await getPrice()
+
+      setInterval(()=>{
+        getPrice()
+      },10000)
+
+
 
       const balanceWBTCPool = await readContract(config,{
         abi: XYZAbi,
