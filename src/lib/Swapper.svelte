@@ -135,7 +135,7 @@
   let connectedWallet = false
 
   // STATE
-  const tokenA = "BTC";
+  const tokenA = "SATS";
   const tokenB = "XYZT";
 
   // swap amount
